@@ -65,17 +65,29 @@ inline static char str_cmp(const char *str0, const char *str1) {
 }
 
 inline static char is_numeric(char c) { return '0' <= c && c <= '9'; }
-inline static char is_aplha(char c) { return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'); }
-inline static char is_root(const char *s) { return strncmp(s, ROOT_SYM, ROOT_LEN) == 0; }
-inline static char is_operation(const char *op) { return *op == '+' || *op == '-' || *op == '*' || *op == '/' || *op == '^' || *op == '%' || is_root(op); }
-inline static unsigned char char_count(const char *s, char d) { unsigned char i = 0; for (; (s[i] != 0) && (i < 255); ++i) { if (s[i] != d) break; } return i; }
+inline static char is_aplha(char c) {
+    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+}
+inline static char is_root(const char *s) {
+    return strncmp(s, ROOT_SYM, ROOT_LEN) == 0;
+}
+inline static char is_operation(const char *op) {
+    return *op == '+' || *op == '-' || *op == '*' || *op == '/' || *op == '^' ||
+           *op == '%' || is_root(op);
+}
+inline static unsigned char char_count(const char *s, char d) {
+    unsigned char i = 0;
+    for (; (s[i] != 0) && (i < 255); ++i) {
+        if (s[i] != d)
+            break;
+    }
+    return i;
+}
 
-enum EXPRESSION_TYPE : uint8_t {
-    EXPRESSION_ERROR = 255, // error while parsing, can be because of invalid
-                            // syntax or invalid token or memory allocation
-    EXPRESSION_EOF = 0,     // also used as unknown
+typedef enum EXPRESSION_TYPE : uint8_t {
+    EXPRESSION_EOF,     // also used as unknown
     //** a and b is both EXPR **//
-    EXPRESSION_ADD = 1, // +
+    EXPRESSION_ADD,     // +
     EXPRESSION_SUB,     // -
     EXPRESSION_MUL,     // *
     EXPRESSION_DIV,     // /
@@ -88,8 +100,11 @@ enum EXPRESSION_TYPE : uint8_t {
     //** a is token and b is unused **//
     EXPRESSION_VAR,   // only a
     EXPRESSION_VALUE, // only a
-};
-enum OPERATION_TYPE : bp_t {
+    
+    EXPRESSION_ERROR, // error while parsing, can be because of invalid
+                      // syntax or invalid token or memory allocation
+} EXPRESSION_TYPE;
+typedef enum OPERATION_TYPE : bp_t {
     OPERATION_EOF = 0,
     OPERATION_ADD = 1, // +
     OPERATION_SUB,     // -
@@ -98,33 +113,14 @@ enum OPERATION_TYPE : bp_t {
     OPERATION_POW,     // ^
     OPERATION_ROOT,    // √
     OPERATION_PERCENT, // %
-};
-enum TOKEN_TYPE : uint8_t {
+} OPERATION_TYPE;
+typedef enum TOKEN_TYPE : uint8_t {
     TOKEN_EOF = 0,
     TOKEN_NUMBER = 1,
     TOKEN_NAME,
     TOKEN_OPERATION, // + - * / ^ % √
     TOKEN_ASSIGN     // =
-};
-
-// binding power used when the operation is in front of its operand (unary)
-static const bp_t prefix_binding_power[] = {
-    [OPERATION_ADD] = 25,
-    [OPERATION_SUB] = 25,
-    [OPERATION_ROOT] = 32,
-};
-
-// binary expression type of each operation
-static const uint8_t operation_to_expression[] = {
-    [OPERATION_EOF] = EXPRESSION_EOF,
-    [OPERATION_ADD] = EXPRESSION_ADD,
-    [OPERATION_SUB] = EXPRESSION_SUB,
-    [OPERATION_MUL] = EXPRESSION_MUL,
-    [OPERATION_DIV] = EXPRESSION_DIV,
-    [OPERATION_POW] = EXPRESSION_POW,
-    [OPERATION_ROOT] = EXPRESSION_ROOT,
-    [OPERATION_PERCENT] = EXPRESSION_PERCENT,
-};
+} TOKEN_TYPE;
 
 // tokenizer
 // conert string data into token
@@ -139,19 +135,21 @@ typedef struct tokenizer_impl {
 } tokenizer_t;
 
 // parser
+
+typedef union expr_tok_duality {
+    expr_index expr;
+    token_index tok;
+} expr_tok_duality;
 // use tokenizer and use it to form AST
 // struct that holds data of single expression
 typedef struct expression_impl {
     // lhs
     // used to tell where is the lhs of the expression, or which token it is
-    union expr_tok_duality {
-        expr_index expr;
-        token_index tok;
-    } a_as;
+    expr_tok_duality a_as;
     // rhs
     // used to tell where is the rhs of the expression
     expr_index b;
-    enum EXPRESSION_TYPE type;
+    EXPRESSION_TYPE type;
 } expression_t;
 
 // parser, also holds the tokens and expressions
@@ -208,6 +206,28 @@ float expression_evaluate(const parser_t *parser, const char *str_view,
 #ifdef CALC_IMPL
 #include <math.h>
 #include <stddef.h>
+
+// binding power used when the operation is in front of its operand (unary)
+static const bp_t prefix_binding_power[] = {
+    0,  // EOF
+    25, // +
+    25, // -
+    0,  // *
+    0,  // /
+    0,  // ^
+    32, // √
+};
+// binary expression type of each operation
+static const enum EXPRESSION_TYPE operation_to_expression[] = {
+    EXPRESSION_EOF,     // OPERATION_EOF
+    EXPRESSION_ADD,     // OPERATION_ADD
+    EXPRESSION_SUB,     // OPERATION_SUB
+    EXPRESSION_MUL,     // OPERATION_MUL
+    EXPRESSION_DIV,     // OPERATION_DIV
+    EXPRESSION_POW,     // OPERATION_POW
+    EXPRESSION_ROOT,    // OPERATION_ROOT
+    EXPRESSION_PERCENT, // OPERATION_PERCENT
+};
 
 // simple routine that will try to tokenize the first token in the string
 token_t tokenize(const char *str_view) {
@@ -289,7 +309,8 @@ token_index parser_append_token(parser_t *parser, token_t token) {
     if (parser->tok_pool_count >= parser->tok_pool_cap) {
         size_t new_cap =
             parser->tok_pool_cap == 0 ? 4 : parser->tok_pool_cap * 2;
-        token_t *pool = REALLOC(parser->token_pool, sizeof(token_t) * new_cap);
+        token_t *pool =
+            (token_t *)REALLOC(parser->token_pool, sizeof(token_t) * new_cap);
         if (pool == NULL) {
             ERROR("Out of memory\n");
             return TOKEN_INDEX_ERROR;
@@ -309,8 +330,8 @@ expr_index parser_append_expression(parser_t *parser, expression_t expr) {
     if (parser->expr_pool_count >= parser->expr_pool_cap) {
         size_t new_cap =
             parser->expr_pool_cap == 0 ? 4 : parser->expr_pool_cap * 2;
-        expression_t *pool =
-            REALLOC(parser->expression_pool, sizeof(expression_t) * new_cap);
+        expression_t *pool = (expression_t *)REALLOC(
+            parser->expression_pool, sizeof(expression_t) * new_cap);
         if (pool == NULL) {
             ERROR("Out of memory\n");
             return EXPR_INDEX_ERROR;
@@ -399,9 +420,11 @@ expr_index parse_internal(parser_t *parser, tokenizer_t *tokenizer,
         token_index lhs_token_index = parser_append_token(parser, lhs_token);
         if (lhs_token_index == TOKEN_INDEX_ERROR)
             return EXPR_INDEX_ERROR;
-        lhs = parser_append_expression(
-            parser, (expression_t){.type = EXPRESSION_VALUE,
-                                   .a_as.tok = lhs_token_index});
+        lhs = parser_append_expression(parser, (expression_t){
+                                                   lhs_token_index,
+                                                   0,
+                                                   EXPRESSION_VALUE,
+                                               });
         if (lhs == EXPR_INDEX_ERROR)
             return EXPR_INDEX_ERROR;
         break;
@@ -412,8 +435,7 @@ expr_index parse_internal(parser_t *parser, tokenizer_t *tokenizer,
         if (lhs_token_index == TOKEN_INDEX_ERROR)
             return EXPR_INDEX_ERROR;
         lhs = parser_append_expression(
-            parser, (expression_t){.type = EXPRESSION_VAR,
-                                   .a_as.tok = lhs_token_index});
+            parser, (expression_t){lhs_token_index, 0, EXPRESSION_VAR});
         if (lhs == EXPR_INDEX_ERROR)
             return EXPR_INDEX_ERROR;
         break;
@@ -436,10 +458,12 @@ expr_index parse_internal(parser_t *parser, tokenizer_t *tokenizer,
             lhs = operand; // +x is just x
         } else {
             lhs = parser_append_expression(
-                parser, (expression_t){.type = op_type == OPERATION_SUB
-                                                   ? EXPRESSION_NEG
-                                                   : EXPRESSION_SQRT,
-                                       .a_as.expr = operand});
+                parser,
+                (expression_t){
+                    operand,
+                    0,
+                    op_type == OPERATION_SUB ? EXPRESSION_NEG : EXPRESSION_SQRT,
+                });
             if (lhs == EXPR_INDEX_ERROR)
                 return EXPR_INDEX_ERROR;
         }
@@ -477,8 +501,7 @@ expr_index parse_internal(parser_t *parser, tokenizer_t *tokenizer,
         // % only has a lhs, so there is nothing to fold
         if (op_type == OPERATION_PERCENT) {
             lhs = parser_append_expression(
-                parser,
-                (expression_t){.type = EXPRESSION_PERCENT, .a_as.expr = lhs});
+                parser, (expression_t){lhs, 0, EXPRESSION_PERCENT});
             if (lhs == EXPR_INDEX_ERROR)
                 return EXPR_INDEX_ERROR;
             continue;
@@ -489,10 +512,7 @@ expr_index parse_internal(parser_t *parser, tokenizer_t *tokenizer,
         if (expr_failed(rhs))
             return EXPR_INDEX_ERROR;
         // construct new expression
-        lhs = parser_append_expression(
-            parser, (expression_t){.type = operation_to_expression[op_type],
-                                   .a_as.expr = lhs,
-                                   .b = rhs});
+        lhs = parser_append_expression(parser, (expression_t){lhs, rhs, operation_to_expression[op_type]});
         if (lhs == EXPR_INDEX_ERROR)
             return EXPR_INDEX_ERROR;
     }
@@ -582,9 +602,10 @@ float expression_evaluate(const parser_t *parser, const char *str_view,
     case EXPRESSION_VAR: {
         return 0.f; // no support for now
     }
-    case EXPRESSION_VALUE:
+    case EXPRESSION_VALUE: {
         token_t a = parser->token_pool[root.a_as.expr];
         return parse_number(str_view + a.pos, a.len);
+    }
     default:
         return 0.f; // error
     }
