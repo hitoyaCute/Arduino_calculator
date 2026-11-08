@@ -2,7 +2,7 @@ This project is originally for school project, but interesting enough to be inve
 
 # this project contains the following
 - simple arduino UI
-- expression evaluator (calculator but not for CS people)
+- expression evaluator (calculator but for CS people)
 - and usage of the OLED
 
 # this project uses
