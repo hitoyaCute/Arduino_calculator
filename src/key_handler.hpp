@@ -2,6 +2,7 @@
 #define INCLUDE_SRC_KEY_HANDLER_HPP_
 
 #include "arduino/keyboard.hpp"
+#include "libs/calc.h"
 #include "libs/str_acc.hpp"
 #include "main.hpp"
 
@@ -12,6 +13,9 @@ inline static void handle_event(bool Fkey_held, str_acc_t<CAP> *acc,
     if (keypad_states.view('=')) {
         evaluate(acc->view(), res);
         acc->clear();
+    } else if (keypad_states.view('R')) {
+        for (int i = 0; i < ROOT_LEN; ++i)
+            acc->append(ROOT_SYM[i]);
     } else if (Fkey_held) {
         if (keypad_states.view('D') && keypad_states.view('F'))
             acc->pop();
