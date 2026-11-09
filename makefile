@@ -8,7 +8,13 @@ PORT ?=
 all: compile
 
 compile:
-	@$(ARDUINO_CLI) compile --fqbn $(BOARD) --build-property "compiler.c.extra_flags=-O3" --build-property "compiler.cpp.extra_flags=-O3" --build-path $(BUILD_DIR) .
+	@$(ARDUINO_CLI) compile --fqbn $(BOARD) \
+		--build-property compiler.c.extra_flags="-ffunction-sections -fdata-sections" \
+		--build-property compiler.cpp.extra_flags="-ffunction-sections -fdata-sections" \
+		--build-property compiler.c.elf.extra_flags="-Wl,--gc-sections" \
+		--build-property compiler.optimization_flags="-O3" \
+		--build-path $(BUILD_DIR) .
+
 	@if [ -f $(BUILD_DIR)/compile_commands.json ]; then \
 		cp $(BUILD_DIR)/compile_commands.json ./compile_commands.json; \
 	fi

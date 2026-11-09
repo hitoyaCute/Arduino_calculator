@@ -18,10 +18,11 @@ on this project i use all my knowledge in computer engineering and programming s
 first prerequisite
 - arduino-cli
 - GNU make
+- U8g2 lib
 
 compilation
 ```console
-$ make # or `make compiile` to compile all
+$ make # or `make compile` to compile all
 $ make upload # or add `PORT=/dev/<PORT>` to enter without promting, this will also monitor and compile
 $ make monitor # or add `PORT=/dev/<PORT>` to enter without promting
 ```

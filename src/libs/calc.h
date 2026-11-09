@@ -198,6 +198,7 @@ float parse_number(const char *str_view, size_t len);
 // nothing to parse, or EXPR_INDEX_ERROR
 expr_index parse_internal(parser_t *parser, tokenizer_t *tokenizer,
                           const char *str_view, bp_t min_power);
+expr_index parse(parser_t *parser, const char *str_view);
 // evluator
 // takes the parsed AST and evaluate, optionally takes array to a array map
 float expression_evaluate(const parser_t *parser, const char *str_view,
@@ -535,7 +536,6 @@ expr_index parse(parser_t *parser, const char *str_view) {
     }
     return root;
 }
-
 // evluator
 // takes the parsed AST and evaluate, optionally takes array to a array map
 float expression_evaluate(const parser_t *parser, const char *str_view,

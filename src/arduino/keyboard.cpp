@@ -7,7 +7,7 @@ void keyboard4x4_read(const keypad4x4_pins_t pins, keypad4x4_state_t* state) {
         // delayMicroseconds(50); // let the line settle
 
         for (int sense = 0; sense < 4; ++sense)
-            state->states[vcc][sense] = digitalRead(pins.sense[sense]) == LOW;
+            state->set(vcc,sense,digitalRead(pins.sense[sense]) == LOW);
         digitalWrite(pins.vcc[vcc], HIGH);
     }
 }
