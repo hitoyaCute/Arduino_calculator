@@ -65,7 +65,7 @@ typedef struct keypad4x4_state_t {
             return this->view(1, 3);
         case '*':
         case 'R':
-            return this->view(0, 3);
+            return this->view(2, 3);
         case '=':
             return this->view(3, 3);
         default:
