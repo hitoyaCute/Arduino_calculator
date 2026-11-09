@@ -1,23 +1,22 @@
 #define CALC_IMPL
 
-
-#define ERROR(...) do {\
-    char buff[256];\
-    snprintf(buff, 255, __VA_ARGS__);\
-    buff[255] = 0;\
-    Serial.println(buff);\
-} while(0)
-
+#define ERROR(fmt, ...)                                                        \
+    do {                                                                       \
+        char b_[48];                                                           \
+        snprintf_P(b_, sizeof(b_), PSTR(fmt), ##__VA_ARGS__);                  \
+        Serial.print(F("!! "));                                                \
+        Serial.print(b_);                                                      \
+    } while (0)
 #include "main.hpp"
-#include "libs/calc.h"
-#include "key_handler.hpp"
-#include "libs/str_acc.hpp"
 #include "arduino/keyboard.hpp"
+#include "key_handler.hpp"
+#include "libs/calc.h"
+#include "libs/str_acc.hpp"
 
-#include <Wire.h>
 #include <Arduino.h>
-#include <U8g2lib.h>
 #include <HardwareSerial.h>
+#include <U8g2lib.h>
+#include <Wire.h>
 
 U8G2_SSD1306_128X32_UNIVISION_1_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 
@@ -30,11 +29,9 @@ keypad4x4_state_t keypad_handled = {};
 
 void blink_init() {
     Serial.begin(115200);
-    Serial.println("starting");
-
     keypad4x4_init(key_pins);
     u8g2.begin();
-    Serial.println("initlaized");
+    Serial.println(F("ready"));
 }
 
 void blink_task() {
@@ -42,14 +39,14 @@ void blink_task() {
     float res;
     process_key_events(&acc, keypad_states, &keypad_handled, &res);
 
-    Serial.print(">>> ");
+    Serial.print(F(">>> "));
     Serial.println(acc.view());
-    Serial.print("res: ");
+    Serial.print(F("res: "));
     Serial.println(res);
 
     u8g2.firstPage();
     do {
-        u8g2.drawFrame(0, 0, 128, 32);     // border
+        u8g2.drawFrame(0, 0, 128, 32); // border
         // u8g2.drawLine(0, 0, 127, 31);      // diagonal line
         // u8g2.drawHLine(10, 28, 40);        // horizontal line
         // u8g2.drawPixel(64, 16);            // single pixel

@@ -28,13 +28,15 @@ const char keypad_chars_F[][4] = {
     {'F',' ','.','='}
 };
 
-inline static void evaluate(const char* t, float* res) {
-    parser_t parser;
+inline static void evaluate(const char *t, float *res) {
+    parser_t parser = {};                       // was uninitialised
     expr_index root = parse(&parser, t);
-    *res = expression_evaluate(&parser, t, parser.expression_pool[root]);
+    if (root == EXPR_INDEX_EOF)
+        ERROR("empty expression");
+    else if (root != EXPR_INDEX_ERROR)          // parse() already reported errors
+        *res = expression_evaluate(&parser, t, parser.expression_pool[root]);
     parser_free(&parser);
 }
-
 
 void blink_task();
 void blink_init();

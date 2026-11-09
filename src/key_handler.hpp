@@ -6,14 +6,16 @@
 #include "main.hpp"
 
 template <unsigned char CAP>
-inline static void handle_event(bool Fkey_held, str_acc_t<CAP>* acc, const keypad4x4_state_t keypad_states,int i, float* res) {
-    if (Fkey_held) {
+inline static void handle_event(bool Fkey_held, str_acc_t<CAP> *acc,
+                                const keypad4x4_state_t keypad_states, int i,
+                                float *res) {
+    if (keypad_states.view('=')) {
+        evaluate(acc->view(), res);
+        acc->clear();
+    } else if (Fkey_held) {
         if (keypad_states.view('D') && keypad_states.view('F'))
             acc->pop();
-        else if (keypad_states.view(3,3)) {
-            evaluate(acc->view(), res);
-            acc->clear();
-        } else
+        else
             acc->append(keypad_chars_F[i / 4][i % 4]);
     } else
         acc->append(keypad_chars_normal[i / 4][i % 4]);
@@ -22,7 +24,7 @@ inline static void handle_event(bool Fkey_held, str_acc_t<CAP>* acc, const keypa
 template <unsigned char CAP>
 void process_key_events(str_acc_t<CAP> *acc,
                         const keypad4x4_state_t keypad_states,
-                        keypad4x4_state_t *keypad_handled, float* res) {
+                        keypad4x4_state_t *keypad_handled, float *res) {
     // handle keys to make it detect low to high
     //
     // flag for each key

@@ -33,37 +33,41 @@ typedef struct keypad4x4_state_t {
     bool view(char c) const {
         switch (c) {
         case '1':
-            return this->view(0,0);
+            return this->view(0, 0);
         case '2':
-            return this->view(0,1);
+            return this->view(0, 1);
         case '3':
-            return this->view(0,2);
+            return this->view(0, 2);
         case '4':
-            return this->view(1,0);
-        case '5': case 'D':
-            return this->view(1,1);
+            return this->view(1, 0);
+        case '5':
+        case 'D':
+            return this->view(1, 1);
         case '6':
-            return this->view(1,2);
+            return this->view(1, 2);
         case '7':
-            return this->view(2,0);
+            return this->view(2, 0);
         case '8':
-            return this->view(2,1);
+            return this->view(2, 1);
         case '9':
-            return this->view(2,2);
+            return this->view(2, 2);
         case '0':
-            return this->view(3,1);
+            return this->view(3, 1);
         case 'F':
-            return this->view(3,0);
+            return this->view(3, 0);
         case '.':
-            return this->view(3,3);
-        case '+': case '/':
-            return this->view(0,3);
-        case '-': case '^':
-            return this->view(1,3);
-        case '*': case 'R':
-            return this->view(0,3);
+            return this->view(3, 3);
+        case '+':
+        case '/':
+            return this->view(0, 3);
+        case '-':
+        case '^':
+            return this->view(1, 3);
+        case '*':
+        case 'R':
+            return this->view(0, 3);
         case '=':
-            return this->view(3,3);
+            return this->view(3, 3);
         default:
             0;
         }
@@ -80,7 +84,6 @@ static const char keypad4x4_chars[4][4] = {{'1', '2', '3', 'A'},
 static inline void
 printKeypad(const keypad4x4_state_t grid,
             const char keypad4x4chars[4][4] = keypad4x4_chars) {
-    Serial.println("\n\n\n\n\n\n\n\n\n\n");
     for (int row = 0; row < 4; row++) {
         for (int col = 0; col < 4; col++) {
             if (grid.view(row, col)) {
