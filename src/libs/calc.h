@@ -65,8 +65,10 @@ inline static char str_cmp(const char *str0, const char *str1) {
 }
 
 inline static char is_numeric(char c) { return '0' <= c && c <= '9'; }
+inline static char is_alphaCap(char c) { return ('A' <= c && c <= 'Z'); }
+inline static char is_alphaSmal(char c) { return ('a' <= c && c <= 'z'); }
 inline static char is_aplha(char c) {
-    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+    return is_alphaSmal(c) || is_alphaCap(c);
 }
 inline static char is_root(const char *s) {
     return strncmp(s, ROOT_SYM, ROOT_LEN) == 0;
@@ -85,14 +87,14 @@ inline static unsigned char char_count(const char *s, char d) {
 }
 
 typedef enum EXPRESSION_TYPE : uint8_t {
-    EXPRESSION_EOF,     // also used as unknown
+    EXPRESSION_EOF, // also used as unknown
     //** a and b is both EXPR **//
-    EXPRESSION_ADD,     // +
-    EXPRESSION_SUB,     // -
-    EXPRESSION_MUL,     // *
-    EXPRESSION_DIV,     // /
-    EXPRESSION_POW,     // ^
-    EXPRESSION_ROOT,    // √
+    EXPRESSION_ADD,  // +
+    EXPRESSION_SUB,  // -
+    EXPRESSION_MUL,  // *
+    EXPRESSION_DIV,  // /
+    EXPRESSION_POW,  // ^
+    EXPRESSION_ROOT, // √
     //** a is EXPR and b is unused **//
     EXPRESSION_PERCENT, // % percent
     EXPRESSION_NEG,     // -x
@@ -100,7 +102,7 @@ typedef enum EXPRESSION_TYPE : uint8_t {
     //** a is token and b is unused **//
     EXPRESSION_VAR,   // only a
     EXPRESSION_VALUE, // only a
-    
+
     EXPRESSION_ERROR, // error while parsing, can be because of invalid
                       // syntax or invalid token or memory allocation
 } EXPRESSION_TYPE;
@@ -513,7 +515,8 @@ expr_index parse_internal(parser_t *parser, tokenizer_t *tokenizer,
         if (expr_failed(rhs))
             return EXPR_INDEX_ERROR;
         // construct new expression
-        lhs = parser_append_expression(parser, (expression_t){lhs, rhs, operation_to_expression[op_type]});
+        lhs = parser_append_expression(
+            parser, (expression_t){lhs, rhs, operation_to_expression[op_type]});
         if (lhs == EXPR_INDEX_ERROR)
             return EXPR_INDEX_ERROR;
     }

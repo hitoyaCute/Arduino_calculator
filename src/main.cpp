@@ -1,3 +1,4 @@
+#include "arduino/display.hpp"
 #define CALC_IMPL
 
 #define ERROR(fmt, ...)                                                        \
@@ -7,11 +8,11 @@
         Serial.print(F("!! "));                                                \
         Serial.print(b_);                                                      \
     } while (0)
-#include "main.hpp"
 #include "arduino/keyboard.hpp"
 #include "key_handler.hpp"
 #include "libs/calc.h"
 #include "libs/str_acc.hpp"
+#include "main.hpp"
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
@@ -26,6 +27,7 @@ str_acc_t<255> acc;
 keypad4x4_state_t keypad_states = {};
 // to tell if key press is handled
 keypad4x4_state_t keypad_handled = {};
+float res = 0;
 
 void blink_init() {
     Serial.begin(115200);
@@ -36,21 +38,19 @@ void blink_init() {
 
 void blink_task() {
     keyboard4x4_read(key_pins, &keypad_states);
-    float res;
     process_key_events(&acc, keypad_states, &keypad_handled, &res);
 
     Serial.print(F(">>> "));
     Serial.println(acc.view());
-    Serial.print(F("res: "));
-    Serial.println(res);
 
-    u8g2.firstPage();
-    do {
-        u8g2.drawFrame(0, 0, 128, 32); // border
-        // u8g2.drawLine(0, 0, 127, 31);      // diagonal line
-        // u8g2.drawHLine(10, 28, 40);        // horizontal line
-        // u8g2.drawPixel(64, 16);            // single pixel
-        // x,y,    bitmap_w, bitmap_h, bitmap
-        // u8g2.drawXBM(x, 12, 8, 8, smiley); // sprite at (x, 12)
-    } while (u8g2.nextPage());
+    char buf[11] = {0};
+    // dtostrf(value, width, precision, output_buffer)
+    dtostrf(res, 10, 2, buf);
+    Serial.print("res: '");
+    Serial.print(buf);
+    Serial.println("'");
+    // buf[9] = '0';
+
+    //
+    draw_UI(acc.view(), buf, &u8g2);
 }

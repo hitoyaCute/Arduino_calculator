@@ -17,8 +17,7 @@ inline static void handle_event(bool Fkey_held, str_acc_t<CAP> *acc,
         if (keypad_states.view('D') && keypad_states.view('F'))
             acc->pop();
         else if (keypad_states.view('R')) {
-            for (int i = 0; i < ROOT_LEN; ++i)
-                acc->append(ROOT_SYM[i]);
+            acc->append('R');
         } else
             acc->append(keypad_chars_F[i / 4][i % 4]);
     } else
