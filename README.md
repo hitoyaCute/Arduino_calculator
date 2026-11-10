@@ -2,6 +2,7 @@ This project is originally for school project, but interesting enough to be inve
 
 ## demo
 ![Demo](media/demo.gif)
+![Demo1](media/demo1.gif)
 
 # this project contains the following
 - simple arduino UI
