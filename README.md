@@ -30,3 +30,22 @@ $ make # or `make compile` to compile all
 $ make upload # or add `PORT=/dev/<PORT>` to enter without promting, this will also monitor and compile
 $ make monitor # or add `PORT=/dev/<PORT>` to enter without promting
 ```
+
+## file structure
+Arduino_calculator
+├── first_prj.ino         - program's entry point
+├── LICENSE               - LICENSE
+├── makefile              - build system
+├── README.md             - this file
+└── src                   - source code
+    ├── arduino           - arduino specific code
+    │   ├── display.cpp   - processing display
+    │   ├── display.hpp   - header
+    │   ├── keyboard.cpp  - keyboard handler lib
+    │   └── keyboard.hpp  - header
+    ├── key_handler.hpp   - key event processor
+    ├── libs              - lib thats not specific to arduino
+    │   ├── calc.h        - my calc.c from hitoyaCute/MEU_CLibs
+    │   └── str_acc.hpp   - string accumulator
+    ├── main.cpp          - where it all starts
+    └── main.hpp          - interface to allow first_prj.ino to use the project
