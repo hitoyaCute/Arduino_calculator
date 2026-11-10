@@ -1,5 +1,8 @@
 This project is originally for school project, but interesting enough to be invested on and give some time to get serious
 
+## demo
+![Demo](media/demo.gif)
+
 # this project contains the following
 - simple arduino UI
 - expression evaluator (calculator but for CS people)
