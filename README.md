@@ -32,6 +32,7 @@ $ make monitor # or add `PORT=/dev/<PORT>` to enter without promting
 ```
 
 ## file structure
+```txt
 Arduino_calculator
 ├── first_prj.ino         - program's entry point
 ├── LICENSE               - LICENSE
@@ -49,3 +50,4 @@ Arduino_calculator
     │   └── str_acc.hpp   - string accumulator
     ├── main.cpp          - where it all starts
     └── main.hpp          - interface to allow first_prj.ino to use the project
+```
