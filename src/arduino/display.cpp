@@ -12,7 +12,7 @@
  * result
  */
 
-void draw_UI(const char *equation, const char *res,
+void draw_UI(const char * const equation, const char * const res,
              U8G2_SSD1306_128X32_UNIVISION_1_HW_I2C *u8g2) {
     u8g2->firstPage();
     do {
@@ -33,6 +33,10 @@ void draw_UI(const char *equation, const char *res,
             } else if (is_alphaCap(*c)) {
                 u8g2->drawXBMP(x, 1, 10, 14, display_alpha_upper[*c - 'A']);
                 x += 12;
+            } else if (str_cmp(c, ROOT_SYM)) {
+                c += ROOT_LEN - 1;
+                u8g2->drawXBMP(x, 1, 10, 14, display_operator[5]);
+                x += 12;
             } else {
                 char op = display_operator_chars(*c);
                 u8g2->drawXBMP(x, 1, 10, 14, display_operator[op]);
@@ -42,7 +46,7 @@ void draw_UI(const char *equation, const char *res,
                     x += 12;
             }
         }
-        char op = display_operator_chars('_');
+        const char op = display_operator_chars('_');
         u8g2->drawXBMP(x, 1, 10, 14, display_operator[op]);
         u8g2->setDrawColor(1);
 
@@ -59,6 +63,12 @@ void draw_UI(const char *equation, const char *res,
                 x += 12;
             } else if (is_numeric(res[i])) {
                 u8g2->drawXBMP(x, 17, 10, 14, display_digits[res[i] - '0']);
+                x += 12;
+            } else if (is_alphaCap(res[i])) {
+                u8g2->drawXBMP(x, 17, 10, 14, display_alpha_upper[res[i] - 'A']);
+                x += 12;
+            } else if (is_alphaSmal(res[i])) {
+                u8g2->drawXBMP(x, 17, 10, 16, display_alpha_lower[res[i] - 'a']);
                 x += 12;
             } else {
                 x += 12;

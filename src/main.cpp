@@ -3,7 +3,7 @@
 
 #define ERROR(fmt, ...)                                                        \
     do {                                                                       \
-        char b_[48];                                                           \
+        char b_[32];                                                           \
         snprintf_P(b_, sizeof(b_), PSTR(fmt), ##__VA_ARGS__);                  \
         Serial.print(F("!! "));                                                \
         Serial.print(b_);                                                      \
@@ -41,7 +41,8 @@ void blink_task() {
     process_key_events(&acc, keypad_states, &keypad_handled, &res);
 
     Serial.print(F(">>> "));
-    Serial.println(acc.view());
+    Serial.print(acc.view());
+    Serial.println("_");
 
     char buf[11] = {0};
     // dtostrf(value, width, precision, output_buffer)
@@ -52,5 +53,9 @@ void blink_task() {
     // buf[9] = '0';
 
     //
-    draw_UI(acc.view(), buf, &u8g2);
+    const unsigned char len = acc.get_len();
+    if (len >= 9)
+        draw_UI(acc.view() + (len - 9), buf, &u8g2);
+    else
+        draw_UI(acc.view(), buf, &u8g2);
 }

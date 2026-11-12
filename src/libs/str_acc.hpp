@@ -11,7 +11,7 @@ public:
     str_acc_t() = default;
 
     void append(char c) {
-        if ((this->len - 1) < CAP) {
+        if ((this->len - 2) < CAP) {
             this->str[this->len++] = c;
             this->str[this->len + 1] = 0;
         }
@@ -27,8 +27,9 @@ public:
     const char* view() const {
         return this->str;
     }
+    const unsigned char get_len() const {return this->len;}
 
-    void clear() { this->str[0] = 0; this->str[1] = 0;this->len = 0; }
+    void clear() { for (unsigned char i = 0; i < CAP; ++i) this->str[i] = 0;this->len = 0;}
 };
 
 #endif  // INCLUDE_LIBS_STR_ACC_HPP_

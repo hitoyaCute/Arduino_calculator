@@ -121,7 +121,9 @@ typedef enum TOKEN_TYPE : uint8_t {
     TOKEN_NUMBER = 1,
     TOKEN_NAME,
     TOKEN_OPERATION, // + - * / ^ % √
-    TOKEN_ASSIGN     // =
+    TOKEN_ASSIGN,    // =
+    TOKEN_OPAREN,    // (
+    TOKEN_CPAREN,    // )
 } TOKEN_TYPE;
 
 // tokenizer
@@ -177,8 +179,6 @@ static const bp_t binding_power[][2] = {
 
 // forward declaration of functions
 
-// simple routine that will try to tokenize the first token in the string
-token_t tokenize(const char *str_view);
 // tokenizer, takes a string and returns a token
 void tokenizer_start(tokenizer_t *tokenizer, const char *str_view);
 // get the current token and move the tokenizer to the next token
@@ -269,6 +269,14 @@ token_t tokenize(const char *str_view) {
         pos++;
         return (token_t){
             .pos = start, .len = pos - start, .type = TOKEN_ASSIGN};
+    } else if (str_view[pos] == '(') {
+        pos++;
+        return (token_t){
+            .pos = start, .len = pos - start, .type = TOKEN_OPAREN};
+    } else if (str_view[pos] == ')') {
+        pos++;
+        return (token_t){
+            .pos = start, .len = pos - start, .type = TOKEN_CPAREN};
     } else {
         return (token_t){.pos = start, .len = 0, .type = TOKEN_EOF};
     }
@@ -472,6 +480,16 @@ expr_index parse_internal(parser_t *parser, tokenizer_t *tokenizer,
         }
         break;
     }
+    case TOKEN_OPAREN: {
+        const expr_index inner = parse_internal(parser, tokenizer, str_view, -1); // fold the expression, expect to have CPAREN left
+        const token_t hope_cparen = tokenizer_peak(tokenizer, str_view);
+        if (hope_cparen.type != TOKEN_CPAREN)
+            // malformed expression, should fail
+            ERROR("unclosed parenthesis");
+        else if (hope_cparen.type == TOKEN_CPAREN)
+            tokenizer_next(tokenizer, str_view);
+        return inner;
+    }
     case TOKEN_EOF:
         return EXPR_INDEX_EOF;
     default:
@@ -484,7 +502,8 @@ expr_index parse_internal(parser_t *parser, tokenizer_t *tokenizer,
         token_t op_token = tokenizer_peak(tokenizer, str_view);
         if (op_token.type != TOKEN_OPERATION) {
             break;
-        }
+        } else if (op_token.type == TOKEN_CPAREN)
+            break;
 
         // check the binding power of the operator
         bp_t op_type = get_operation(str_view + op_token.pos);
@@ -588,7 +607,7 @@ float expression_evaluate(const parser_t *parser, const char *str_view,
             parser, str_view, parser->expression_pool[root.a_as.expr]);
         float rhs = expression_evaluate(parser, str_view,
                                         parser->expression_pool[root.b]);
-        return powf(lhs, rhs);
+        return powf(rhs, 1.f / lhs);
     }
     case EXPRESSION_PERCENT:
         return expression_evaluate(parser, str_view,

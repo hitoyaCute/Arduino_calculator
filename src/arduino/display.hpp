@@ -111,7 +111,7 @@ inline static char display_operator_chars(char c) {
     case '*': return 2;
     case '/': return 3;
     case '^': return 4;
-    case '~': return 5;
+    case 'R': return 5;
     case '=': return 6;
     case '_': return 7;
     case '.': return 8;
