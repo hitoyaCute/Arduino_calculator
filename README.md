@@ -51,3 +51,9 @@ Arduino_calculator
     ├── main.cpp          - where it all starts
     └── main.hpp          - interface to allow first_prj.ino to use the project
 ```
+
+## current limitations
+- Arduino uno r3 provides only 2KiB of memory and makes it unable to add
+    variable support
+    deeper expression
+- Bad input, the current 4x4 keypad is good for first project, however its limiting me, it doesnt have proper way of reading and its hard to read every button without the keypad sorting its self inside and making other button looks like they have been pressed, and theres a current issue where the arduino is unable to detect 2 or more readings per voltage source
